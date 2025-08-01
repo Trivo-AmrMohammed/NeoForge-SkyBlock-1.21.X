@@ -11,6 +11,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombieVillager;
+import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -77,6 +79,7 @@ public class SkyblockUtilitiesMod {
             int randomNetherWart = (int)(Math.random() * netherWartRange);
             int randomBlazeRod = (int)(Math.random() * blazeRodRange);
             int randomDiamond = (int)(Math.random() * diamondRange);
+            int randomLapis = (int)(3 + Math.random() * 3);
 
             if (entity instanceof Witch) {
                 if (randomNetherWart == 1) {
@@ -106,6 +109,16 @@ public class SkyblockUtilitiesMod {
                             event.getEntity().getZ(),
                             Items.DIAMOND.getDefaultInstance()));
                 }
+            }
+
+            if (entity instanceof WanderingTrader) {
+                ItemStack lapisAmount = new ItemStack(Items.LAPIS_LAZULI, randomLapis);
+                event.getDrops().add(new ItemEntity(
+                            event.getEntity().level(),
+                            event.getEntity().getX(),
+                            event.getEntity().getY(),
+                            event.getEntity().getZ(),
+                            lapisAmount));
             }
         }
     }
