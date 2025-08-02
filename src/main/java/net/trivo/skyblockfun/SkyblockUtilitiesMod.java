@@ -8,9 +8,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Witch;
-import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.monster.ZombieVillager;
+import net.minecraft.world.entity.monster.*;
+import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -62,7 +61,7 @@ public class SkyblockUtilitiesMod {
     }
 
     @SubscribeEvent
-    public void witchNzombieDrop(LivingDropsEvent event) {
+    public void mobsDropEvent(LivingDropsEvent event) {
         LivingEntity entity = event.getEntity();
         if (event.getSource().getEntity() instanceof ServerPlayer serverPlayer) {
             Registry<Enchantment> enchantmentRegistry = serverPlayer.serverLevel().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
@@ -71,15 +70,20 @@ public class SkyblockUtilitiesMod {
 
             int witchBonus = lootingLevel * 5;
             int zombieBonus = lootingLevel * 40;
+            int zombifiedPiglinBonus = lootingLevel * 100;
+            int piglinBonus = lootingLevel * 50;
 
             int netherWartRange = Math.max(1, 25 - witchBonus);
             int blazeRodRange = Math.max(1, 25 - witchBonus);
             int diamondRange = Math.max(1, 200 - zombieBonus);
+            int netheriteScrapRange = Math.max(1, 750 - zombifiedPiglinBonus);
+            int upgradeTemplateRange = Math.max(1, 300 - piglinBonus);
 
             int randomNetherWart = (int)(Math.random() * netherWartRange);
             int randomBlazeRod = (int)(Math.random() * blazeRodRange);
             int randomDiamond = (int)(Math.random() * diamondRange);
-            int randomLapis = (int)(3 + Math.random() * 3);
+            int randomNetheriteScrap = (int)(Math.random() * netheriteScrapRange);
+            int randomUpgradeTemplate = (int)(Math.random() * upgradeTemplateRange);
 
             if (entity instanceof Witch) {
                 if (randomNetherWart == 1) {
@@ -100,7 +104,7 @@ public class SkyblockUtilitiesMod {
                 }
             }
 
-            if (entity instanceof Zombie) {
+            if (entity instanceof Zombie && !(entity instanceof ZombifiedPiglin) && !(entity instanceof Drowned)) {
                 if (randomDiamond == 1) {
                     event.getDrops().add(new ItemEntity(
                             event.getEntity().level(),
@@ -111,14 +115,26 @@ public class SkyblockUtilitiesMod {
                 }
             }
 
-            if (entity instanceof WanderingTrader) {
-                ItemStack lapisAmount = new ItemStack(Items.LAPIS_LAZULI, randomLapis);
-                event.getDrops().add(new ItemEntity(
+            if (entity instanceof ZombifiedPiglin) {
+                if (randomNetheriteScrap == 1) {
+                    event.getDrops().add(new ItemEntity(
                             event.getEntity().level(),
                             event.getEntity().getX(),
                             event.getEntity().getY(),
                             event.getEntity().getZ(),
-                            lapisAmount));
+                            Items.NETHERITE_SCRAP.getDefaultInstance()));
+                }
+            }
+
+            if (entity instanceof Piglin) {
+                if (randomUpgradeTemplate == 1) {
+                    event.getDrops().add(new ItemEntity(
+                            event.getEntity().level(),
+                            event.getEntity().getX(),
+                            event.getEntity().getY(),
+                            event.getEntity().getZ(),
+                            Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultInstance()));
+                }
             }
         }
     }
