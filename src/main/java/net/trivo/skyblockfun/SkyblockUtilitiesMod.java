@@ -70,13 +70,13 @@ public class SkyblockUtilitiesMod {
 
             int witchBonus = lootingLevel * 5;
             int zombieBonus = lootingLevel * 40;
-            int zombifiedPiglinBonus = lootingLevel * 100;
+            int zombifiedPiglinBonus = lootingLevel * 125;
             int piglinBonus = lootingLevel * 50;
 
             int netherWartRange = Math.max(1, 25 - witchBonus);
             int blazeRodRange = Math.max(1, 25 - witchBonus);
             int diamondRange = Math.max(1, 200 - zombieBonus);
-            int netheriteScrapRange = Math.max(1, 750 - zombifiedPiglinBonus);
+            int netheriteScrapRange = Math.max(1, 1000 - zombifiedPiglinBonus);
             int upgradeTemplateRange = Math.max(1, 300 - piglinBonus);
 
             int randomNetherWart = (int)(Math.random() * netherWartRange);
