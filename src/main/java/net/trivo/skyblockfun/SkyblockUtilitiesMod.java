@@ -16,7 +16,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
 
@@ -33,6 +37,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
 import java.awt.*;
+import java.util.Random;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(SkyblockUtilitiesMod.MODID)
@@ -63,81 +68,115 @@ public class SkyblockUtilitiesMod {
     @SubscribeEvent
     public void mobsDropEvent(LivingDropsEvent event) {
         LivingEntity entity = event.getEntity();
+        int lootingLevel = 0;
+
         if (event.getSource().getEntity() instanceof ServerPlayer serverPlayer) {
             Registry<Enchantment> enchantmentRegistry = serverPlayer.serverLevel().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
             Holder<Enchantment> lootingHolder = enchantmentRegistry.getHolderOrThrow(Enchantments.LOOTING);
-            int lootingLevel = serverPlayer.getMainHandItem().getEnchantmentLevel(lootingHolder);
+            lootingLevel = serverPlayer.getMainHandItem().getEnchantmentLevel(lootingHolder);
+        }
 
-            int witchBonus = lootingLevel * 5;
-            int zombieBonus = lootingLevel * 40;
-            int zombifiedPiglinBonus = lootingLevel * 125;
-            int piglinBonus = lootingLevel * 50;
+        int witchBonus = lootingLevel * 5;
+        int zombieBonus = lootingLevel * 40;
+        int zombifiedPiglinBonus = lootingLevel * 125;
+        int piglinBonus = lootingLevel * 50;
 
-            int netherWartRange = Math.max(1, 25 - witchBonus);
-            int blazeRodRange = Math.max(1, 25 - witchBonus);
-            int diamondRange = Math.max(1, 200 - zombieBonus);
-            int netheriteScrapRange = Math.max(1, 1000 - zombifiedPiglinBonus);
-            int upgradeTemplateRange = Math.max(1, 300 - piglinBonus);
+        int netherWartRange = Math.max(1, 25 - witchBonus);
+        int blazeRodRange = Math.max(1, 25 - witchBonus);
+        int diamondRange = Math.max(1, 200 - zombieBonus);
+        int netheriteScrapRange = Math.max(1, 1000 - zombifiedPiglinBonus);
+        int upgradeTemplateRange = Math.max(1, 300 - piglinBonus);
 
-            int randomNetherWart = (int)(Math.random() * netherWartRange);
-            int randomBlazeRod = (int)(Math.random() * blazeRodRange);
-            int randomDiamond = (int)(Math.random() * diamondRange);
-            int randomNetheriteScrap = (int)(Math.random() * netheriteScrapRange);
-            int randomUpgradeTemplate = (int)(Math.random() * upgradeTemplateRange);
+        int randomNetherWart = (int)(Math.random() * netherWartRange);
+        int randomBlazeRod = (int)(Math.random() * blazeRodRange);
+        int randomDiamond = (int)(Math.random() * diamondRange);
+        int randomNetheriteScrap = (int)(Math.random() * netheriteScrapRange);
+        int randomUpgradeTemplate = (int)(Math.random() * upgradeTemplateRange);
 
-            if (entity instanceof Witch) {
-                if (randomNetherWart == 1) {
-                    event.getDrops().add(new ItemEntity(
-                            event.getEntity().level(),
-                            event.getEntity().getX(),
-                            event.getEntity().getY(),
-                            event.getEntity().getZ(),
-                            Items.NETHER_WART.getDefaultInstance()));
-                }
-                if (randomBlazeRod == 1) {
-                    event.getDrops().add(new ItemEntity(
-                            event.getEntity().level(),
-                            event.getEntity().getX(),
-                            event.getEntity().getY(),
-                            event.getEntity().getZ(),
-                            Items.BLAZE_ROD.getDefaultInstance()));
-                }
+        if (entity instanceof Witch) {
+            if (randomNetherWart == 1) {
+                event.getDrops().add(new ItemEntity(
+                        event.getEntity().level(),
+                        event.getEntity().getX(),
+                        event.getEntity().getY(),
+                        event.getEntity().getZ(),
+                        Items.NETHER_WART.getDefaultInstance()));
             }
-
-            if (entity instanceof Zombie && !(entity instanceof ZombifiedPiglin) && !(entity instanceof Drowned)) {
-                if (randomDiamond == 1) {
-                    event.getDrops().add(new ItemEntity(
-                            event.getEntity().level(),
-                            event.getEntity().getX(),
-                            event.getEntity().getY(),
-                            event.getEntity().getZ(),
-                            Items.DIAMOND.getDefaultInstance()));
-                }
+            if (randomBlazeRod == 1) {
+                event.getDrops().add(new ItemEntity(
+                        event.getEntity().level(),
+                        event.getEntity().getX(),
+                        event.getEntity().getY(),
+                        event.getEntity().getZ(),
+                        Items.BLAZE_ROD.getDefaultInstance()));
             }
+        }
 
-            if (entity instanceof ZombifiedPiglin) {
-                if (randomNetheriteScrap == 1) {
-                    event.getDrops().add(new ItemEntity(
-                            event.getEntity().level(),
-                            event.getEntity().getX(),
-                            event.getEntity().getY(),
-                            event.getEntity().getZ(),
-                            Items.NETHERITE_SCRAP.getDefaultInstance()));
-                }
+        if (entity instanceof Zombie && !(entity instanceof ZombifiedPiglin)) {
+            if (randomDiamond == 1) {
+                event.getDrops().add(new ItemEntity(
+                        event.getEntity().level(),
+                        event.getEntity().getX(),
+                        event.getEntity().getY(),
+                        event.getEntity().getZ(),
+                        Items.DIAMOND.getDefaultInstance()));
             }
+        }
 
-            if (entity instanceof Piglin) {
-                if (randomUpgradeTemplate == 1) {
-                    event.getDrops().add(new ItemEntity(
-                            event.getEntity().level(),
-                            event.getEntity().getX(),
-                            event.getEntity().getY(),
-                            event.getEntity().getZ(),
-                            Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultInstance()));
-                }
+        if (entity instanceof ZombifiedPiglin) {
+            if (randomNetheriteScrap == 1) {
+                event.getDrops().add(new ItemEntity(
+                        event.getEntity().level(),
+                        event.getEntity().getX(),
+                        event.getEntity().getY(),
+                        event.getEntity().getZ(),
+                        Items.NETHERITE_SCRAP.getDefaultInstance()));
+            }
+        }
+
+        if (entity instanceof Piglin) {
+            if (randomUpgradeTemplate == 1) {
+                event.getDrops().add(new ItemEntity(
+                        event.getEntity().level(),
+                        event.getEntity().getX(),
+                        event.getEntity().getY(),
+                        event.getEntity().getZ(),
+                        Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE.getDefaultInstance()));
             }
         }
     }
+
+    @SubscribeEvent
+    public void blockItemDropEvent(BlockDropsEvent event) {
+        if (event.getState().getBlock() == Blocks.JUNGLE_LEAVES) {
+            int fortuneLevel = 0;
+
+            if (event.getBreaker() instanceof ServerPlayer serverPlayer) {
+                Registry<Enchantment> enchantmentRegistry = serverPlayer.serverLevel().registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+                Holder<Enchantment> fortuneHolder = enchantmentRegistry.getHolderOrThrow(Enchantments.FORTUNE);
+                fortuneLevel = serverPlayer.getMainHandItem().getEnchantmentLevel(fortuneHolder);
+            }
+
+            int baseChance = 100;
+            int fortuneBonus = fortuneLevel * 20;
+
+            int chanceRange = Math.max(40, baseChance - fortuneBonus);
+
+            int randomCocoa = (int)(Math.random() * chanceRange);
+
+            if (randomCocoa == 1) {
+                event.getDrops().add(new ItemEntity(
+                        event.getLevel(),
+                        event.getPos().getX(),
+                        event.getPos().getY(),
+                        event.getPos().getZ(),
+                        Items.COCOA_BEANS.getDefaultInstance()
+                ));
+            }
+        }
+    }
+
+
 
     private void commonSetup(FMLCommonSetupEvent event) {
 
